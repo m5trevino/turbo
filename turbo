@@ -1,0 +1,144 @@
+#!/bin/zsh
+# 🦅 THE TREVINO DOCTRINE: V42.2 - turbo [Final Weld] 🦅
+# MISSION: fuck metropcs
+# ------------------------------------------------------------
+
+# 1. BRAIN CHECK: Ensure we are in Zsh
+if [ -z "$ZSH_VERSION" ]; then
+    exec zsh "$0" "$@"
+fi
+
+CYAN='\033[1;36m'
+GREEN='\033[1;32m'
+RED='\033[1;31m'
+YELLOW='\033[1;33m'
+PURPLE='\033[1;35m'
+BLUE='\033[1;34m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+
+step() {
+    # We use echo -e to make the boxes look sharp
+    echo -e "\n${BLUE}┌──[ ARCHITECT LOGIC ]─────────────────────────────────────┐${NC}"
+    echo -e "${BLUE}│${NC} ${WHITE}$2${NC}"
+    echo -e "${BLUE}├──────────────────────────────────────────────────────────┤${NC}"
+    echo -e "${BLUE}│${NC} ${CYAN}ACTION: $1${NC}"
+    echo -e "${BLUE}└──────────────────────────────────────────────────────────┘${NC}"
+    echo -ne "${PURPLE}>> PRESS [ANY KEY] TO EXECUTE STRIKE...${NC}"
+    
+    # Pause logic - only works in Zsh
+    read -k 1 -s
+    
+    echo -e "\n${YELLOW}[EXECUTING...]${NC}"
+    eval $1
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}[✔] SUCCESS.${NC}"
+    else
+        echo -e "${RED}[✘] FLINCHED.${NC}"
+    fi
+}
+
+draw_header() {
+    clear
+    echo -e "${PURPLE}"
+    echo "   █████                         █████              "
+    echo "  ░░███                         ░░███               "
+    echo "  ███████   █████ ████ ████████  ░███████   ██████  "
+    echo " ░░░███░   ░░███ ░███ ░░███░░███ ░███░░███ ███░░███ "
+    echo "   ░███     ░███ ░███  ░███ ░░░  ░███ ░███░███ ░███ "
+    echo "   ░███ ███ ░███ ░███  ░███      ░███ ░███░███ ░███ "
+    echo "   ░░█████  ░░████████ █████     ████████ ░░██████  "
+    echo "    ░░░░░    ░░░░░░░░ ░░░░░     ░░░░░░░░   ░░░░░░   "
+    echo "                                                    "    
+    echo -e "   -- [ THE MASTER turbo FINISHER ] -- [ V42.2 ] --${NC}"
+}
+
+launch_turbo() {
+    echo -e "${YELLOW}╔══════════════════════════════════════════════════════════╗"
+    echo -e "║          WAR ROOM: INITIATING TURBO        ║"
+    echo -e "╚══════════════════════════════════════════════════════════╝${NC}"
+    step "sudo pkill -9 tun2socks; sudo pkill -9 dnsmasq; sudo pkill -9 hostapd; sudo adb kill-server; sudo rm -f /tmp/5037; sudo rm -f ~/.android/adbkey*" "Scrubbing system ghosts and clearing ADB socket locks."
+    step "sudo iptables -I OUTPUT -p udp --dport 53 -j DROP" "[Kill DNS Rainfall]"
+    step "sudo iptables -I OUTPUT -p udp --dport 123 -j DROP" "[Kill Clock Sync Rainfall]"
+    step "sudo sysctl -w net.ipv4.ip_default_ttl=65" "[Applying TTL 65 mangle.]"
+    step "sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1" "[Nuking the IPv6 backdoor.]"
+    step "sudo sysctl -w net.ipv4.tcp_fastopen=3" "[Enabling FastOpen.]"
+    step "sudo sysctl -w net.core.default_qdisc=fq" "[Setting Fair Queuing.]"
+    step "sudo sysctl -w net.ipv4.tcp_congestion_control=bbr" "[Engaging BBR Engine.]"
+    step "sudo adb start-server" "[Starting ADB as Root.]"
+    step "adb wait-for-device" "[Waiting for USB handshake...]"
+    step "adb forward tcp:1081 tcp:1081" "Welding Port 1081."
+    step "sudo ip tuntap add dev tun0 mode tun; sudo ip addr add 10.0.0.1/24 dev tun0; sudo ip link set dev tun0 mtu 1280 up" "[Building Tunnel Interface.]"
+    step "sudo ip route del default 2>/dev/null; sudo ip route add default dev tun0 metric 1" "[Enforcing Singularity.]"
+    step "sudo /usr/local/bin/tun2socks -device tun0 -proxy socks5://127.0.0.1:1081 -interface lo &!" "[Launching Ghost Engine.]"
+    step "echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\noptions use-vc' | sudo tee /etc/resolv.conf" "[Welding TCP-DNS.]"
+    step "sudo iptables -I OUTPUT -o tun0 -p udp -j DROP" "[UDP Kill-switch.]"
+    echo -e "${GREEN}🎯 turbo TUNNEL LOCKED. 🎯${NC}"
+}
+
+launch_ghost() {
+    echo -e "${PURPLE}╔══════════════════════════════════════════════════════════╗"
+    echo -e "║          WAR ROOM: INITIATING GHOST      ║"
+    echo -e "╚══════════════════════════════════════════════════════════╝${NC}"
+    step "sudo modprobe dummy 2>/dev/null" "Loading dummy kernel module."
+    step "sudo ip link add nm-ghost type dummy 2>/dev/null; sudo ip addr add 1.1.1.2/32 dev nm-ghost 2>/dev/null" "Creating ghost hardware."
+    step "sudo nmcli device set nm-ghost managed yes; sudo ip link set nm-ghost up" "Forcing NetworkManager state."
+}
+
+launch_wifi() {
+    echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗"
+    echo -e "║          WAR ROOM: INITIATING WIFI      ║"
+    echo -e "╚══════════════════════════════════════════════════════════╝${NC}"
+    step "sudo rfkill unblock all; sudo iw dev wlan0 set power_save off" "Unblocking radio."
+    step "sudo nmcli device set wlan0 managed no; sudo ip link set wlan0 up" "Manual wlan0 control."
+    step "sudo ip addr flush dev wlan0; sudo ip addr add 192.168.10.1/24 dev wlan0" "Setting Gateway IP."
+    step "sudo sysctl -w net.ipv4.ip_forward=1" "Opening kernel gates."
+    step "sudo iptables -t nat -F; sudo iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE" "Welding NAT Masquerade."
+    step "sudo iptables -t nat -I PREROUTING -i wlan0 -p udp --dport 53 -j REDIRECT --to-ports 53" "Hijacking DNS."
+    step "sudo iptables -I INPUT -i wlan0 -p udp --dport 67:68 --sport 67:68 -j ACCEPT" "Opening DHCP door."
+    step "sudo iptables -A FORWARD -i wlan0 -o tun0 -j ACCEPT" "Allowing traffic bridge."
+    echo -e "interface=wlan0\ndriver=nl80211\nssid=still my router gently weeps\nhw_mode=g\nieee80211n=1\nchannel=6\nwpa=2\nwpa_passphrase=..qazwsx\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=CCMP\nrsn_pairwise=CCMP" > /tmp/hostapd_weeps.conf
+    echo "interface=wlan0\nbind-interfaces\ndhcp-range=192.168.10.10,192.168.10.50,12h\ndhcp-option=3,192.168.10.1\ndhcp-option=6,192.168.10.1\nserver=8.8.8.8\nno-resolv" > /tmp/dnsmasq_weeps.conf
+    step "sudo dnsmasq -i wlan0 -C /tmp/dnsmasq_weeps.conf -d &!" "Launching IP Provider."
+    step "sudo hostapd -B /tmp/hostapd_weeps.conf" "Broadcasting SSID."
+}
+
+launch_nuke() {
+    echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗"
+    echo -e "║          WAR ROOM: SYSTEM CLEAN     ║"
+    echo -e "╚══════════════════════════════════════════════════════════╝${NC}"
+    step "sudo pkill -9 tun2socks; sudo pkill -9 dnsmasq; sudo pkill -9 hostapd" "Executing all daemons."   
+    step "sudo rm -f ~/.android/adbkey*" "Removing RSA keys."
+    step "sudo pkill -9 adb; sudo rm -f ~/.android/adb.5037" "Removing ADB remnants."
+    step "adb kill-server" "kill adb server"
+    step "sudo ip link set tun0 down 2>/dev/null; sudo ip link delete tun0 2>/dev/null" "Scrubbing TUN0.0"
+    step "sudo ip link set nm-ghost down 2>/dev/null; sudo ip link delete nm-ghost 2>/dev/null" "Scrubbing Ghost."
+    step "sudo nmcli device set wlan0 managed yes" "Restoring NM Control."
+    step "sudo iptables -F; sudo iptables -t nat -F" "Baseline Firewall."
+    step "sudo sysctl -w net.ipv4.ip_forward=0" "Baseline Routing."
+    step "echo -e 'nameserver 1.1.1.1' | sudo tee /etc/resolv.conf" "Baseline DNS."
+    step "nmcli general status" "nmcli general status"
+    step "ip route show" "ip route show"
+    step "adb devices" "adb devices status"
+    echo -e "${GREEN}[✔] System Cleaned.${NC}"
+}
+
+draw_header
+while true; do
+    echo -e "\n${CYAN}1. [ TURBO ]${NC}    - Turbo Connection"
+    echo -e "${PURPLE}2. [ GHOST ]${NC}   - NM-Ghost "
+    echo -e "${BLUE}3. [ WIFI ]${NC}   - WIFI Rebroadcast"
+    echo -e "${RED}4. [ NUKE ]${NC}    - Return system to baseline"
+    echo -e "${GREEN}5. [ HUD ]${NC}     - Launch GUI Telemetry"
+    echo -e "${YELLOW}6. [ EXIT ]${NC}"
+    echo -ne "\n${WHITE}COMMAND > ${NC}"
+    read choice
+    case $choice in
+        1) launch_turbo ;;
+        2) launch_ghost ;;
+        3) launch_wifi ;;
+        4) launch_nuke ;;
+        5) python3 /usr/local/bin/hud ;;
+        6) exit 0 ;;
+    esac
+done
